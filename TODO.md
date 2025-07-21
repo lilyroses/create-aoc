@@ -7,7 +7,18 @@
   - [ ] Update missing/empty input file(s)
   - [ ] Fetch input data for empty "input.txt" files (if possible)
 
-- [ ] Move validate_cookie functionality to separate module
+- [ ] Add DOWNLOAD PUZZLE DESCRIPTION feature
+
+- [ ] Add TEST CASES feature
+   - [ ] Download test cases
+   - [ ] Create tests/ dir in each day folder
+   - [ ] Create test_solution_1.py and test_solution_2.py that read in main() from their respective solution functions
+   - [ ] Create test_input_1.txt and test_input_2.txt
+
+- [ ] Add SOLVE PUZZLE feature
+   - [ ] Send answer from command line to site and return result
+
+- [x] Move validate_cookie functionality to separate module
 
 - [x] Add `update_progress.py` tool to allow user to
    supply year, day and solution level (1 or 2) as parameters

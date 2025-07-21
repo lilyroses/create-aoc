@@ -95,65 +95,21 @@ def check_dir_is_writeable(project_dir_name):
         return True
 
 
-dir_is_writeable = check_dir_is_writeable(parent_dir)
-if not dir_is_writeable:
-    exit_program(complete=False)
-
-
-session_cookie = get_session_cookie(SESSION_COOKIE_FILE)
-if not session_cookie:
-    continue_without_cookie = input(f"\nError: session cookie does not exist. Puzzle input data will not be downloaded. Continue? (Y/N): ")
-    if continue_without_cookie_file.upper() != "Y":
-        print(f"Update your {SESSION_COOKIE_FILE} with your logged in session cookie and re-run create_aoc.py.")
-        sys.exit(complete=False)
-cookie_is_valid = validate_session_cookie(session_cookie)
-
-
-
-
-
 def fetch_input_data(cookie, input_data_url, input_data_path):
     pass
 
 
-
 # FILE & FOLDER CREATION
 def create_directory(dir_path):
-  if os.path.exists(dir_path):
-    if os.listdir(dir_path):
-      print(f"\nError: {dir_path} exists and is non-empty.")
-      exit_program()
-    else:
-      print(f"\n{dir_path} exists and is empty. Continuing setup...")
-  else:
-    try:
-      os.mkdir(dir_path)
-    except FileNotFoundError:
-      print(f"\nError: Incorrect path for {dir_path}. Ensure all directories exist before continuing.")
-      exit_program()
-    except OSError:
-      print("\nError: Permission denied when attempting creation of {dir_path}.")
-      exit_program()
+    pass
 
 
 def create_file(file_path, contents=""):
-  if os.path.exists(file_path):
-    print(f"\nError: {file_path} exists.")
-    exit_program()
-  else:
-    try:
-      with open(file_path, "w") as f:
-        f.write(contents)
-    except OSError:
-      print(f"\nError: Permission denied when attempting to write {file_path}.")
-      exit_program()
-    except FileNotFoundError:
-      print(f"\nError: Incorrect path for {file_path}. Ensure all directories exist before continuing.")
-      exit_program()
+    pass
 
 
 def generate_solution_file_content(solution_number, year, day):
-  content = f"""# Solution {solution_number} - Advent of Code {year}, Day {day}
+    content = f"""# Solution {solution_number} - Advent of Code {year}, Day {day}
 
 INPUT_FILE = \"input.txt\"
 with open(INPUT_FILE, \"r\") as f:
@@ -211,4 +167,23 @@ def create_aoc(PROJECT_FOLDER_PATH, YEAR_RANGE, DAY_RANGE):
       with open(input_data_file_path, "w") as f:
         f.write(puzzle_input.strip())
 
-exit_program(complete=True)
+  exit_program(complete=True)
+
+
+project_dir_is_writeable = check_dir_is_writeable(parent_dir)
+if not project_dir_is_writeable:
+    exit_program(complete=False)
+
+project_dir = parent_dir
+
+
+session_cookie = get_session_cookie(SESSION_COOKIE_FILE)
+if not session_cookie:
+    continue_without_cookie = input(f"\nError: session cookie does not exist. Puzzle input data will not be downloaded. Continue? (Y/N): ")
+    if continue_without_cookie_file.upper() != "Y":
+        print(f"Update your {SESSION_COOKIE_FILE} with your logged in session cookie and re-run create_aoc.py.")
+        sys.exit(complete=False)
+
+cookie_is_valid = validate_session_cookie(session_cookie)
+if not cookie_is_valid:
+    pass
