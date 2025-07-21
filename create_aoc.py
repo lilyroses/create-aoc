@@ -48,106 +48,73 @@ Advent-of-Code/
     ...
     |__ day_[xx]/
 """
-
 import os
 import requests
 import sys
-from datetime import datetime
+import tempfile
+
+from event_info import *
+from validate_session_cookie import get_session_cookie, validate_session_cookie
 
 
-# ADVENT OF CODE INFO
-ADVENT_OF_CODE_BASE_URL = "https://adventofcode.com"
+# PROJECT PATH INFO
+cwd = os.getcwd()
+parent_dir = os.path.dirname(cwd)
 SESSION_COOKIE_FILE = "cookie.txt"
 
 
+
 def exit_program(complete=False):
-  if complete:
-    print("\nComplete.")
-  print("\nExiting...")
-  sys.exit()
+    """Exits the program with a message."""
+    if complete:
+        print("\nComplete.")
+    print("\nExiting...")
+    sys.exit()
 
 
-def validate_session_cookie(SESSION_COOKIE_FILE):
-  """Validate the session cookie within the SESSION_COOKIE_FILE.
+def check_dir_is_writeable(project_dir_name):
+    """Ensure that the Advent-of-Code/ project directory is writable.
 
-  args: SESSION_COOKIE_FILE (str, path)
-  returns: cookie_is_valid (Boolean value)
-  """
-  cookie_is_valid = False
+    Args:
+      * project_dir_name: the directory name where the Advent-of-Code/
+        folder will be created, which by default is the parent
+        directory of the create-aoc/ folder. (str)
 
-  # cookie file does not exist
-  if not os.path.exists(SESSION_COOKIE_FILE):
-    continue_without_cookie_file = input(f"\nError: {SESSION_COOKIE_FILE} does not exist. Puzzle input data will not be downloaded. Continue? (Y/N): ")
-    if continue_without_cookie_file.upper() == "Y":
-      return cookie_is_valid
+    Return value:
+      * dir_is_writeable: a Boolean value representing whether or not
+        the project directory is writeable. (bool)
+    """
+    try:
+        # avoid name clashes
+        testfile = tempfile.TemporaryFile(dir=dir_name)
+        testfile.close()
+    except OSError as e:
+        print(f"Error: {project_dir_name} is not writeable.")
+        return False
     else:
-      print("\nExiting...")
-      sys.exit()
-  
-  # cookie file exists
-  with open(SESSION_COOKIE_FILE, "r") as f:
-    SESSION_COOKIE = f.read().strip()
-  
-  # cookie file is empty
-  if not SESSION_COOKIE:
-    continue_without_cookie_text = input(f"\n{SESSION_COOKIE_FILE} does not contain a cookie. Puzzle input data will not be downloaded. Continue? (Y/N): ")
-    if continue_without_cookie_text.upper() == "Y":
-      return cookie_is_valid
-    else:
-      exit_program()
-    
-  # cookie file is not empty
-  # Test cookie for validity
-  session = requests.Session()
-  HEADERS = {
-    "Cookie":f"session={SESSION_COOKIE}",
-    "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
-  }
-  test_url = f"{ADVENT_OF_CODE_BASE_URL}/2015/day/1/input"
-  response = session.get(test_url, headers=HEADERS)
-
-  # cookie is valid
-  if response.status_code == 200:
-    cookie_is_valid = True
-    return cookie_is_valid
-
-  # cookie is not valid
-  if not cookie_is_valid:
-    continue_prompt = input("Non-existent or invalid cookie. Puzzle input data will not be downloaded. Continue? (Y/N): ")
-    if continue_prompt.upper() != "Y":
-      exit_program()
-    else:
-      return cookie_is_valid
-
-def fetch_input_data(cookie, )
+        return True
 
 
-# DATE RANGES
-current = datetime.today()
-YEAR_START, YEAR_END = (2015, current.year)
-if current.month != 12:
-  YEAR_END -= 1
-YEAR_RANGE = range(YEAR_START, YEAR_END+1)
-DAY_START, DAY_END = (1,25)
-DAY_RANGE = range(DAY_START, DAY_END+1)
-
-# EVENT STATUS
-EVENT_ONGOING = False
-MONTH_IS_DECEMBER = current.month == 12
-DATE_IS_WITHIN_ADVENT = current.day <= DAY_END
-if (MONTH_IS_DECEMBER and DATE_IS_WITHIN_ADVENT):
-  EVENT_ONGOING = True
-  DAY_RANGE_ADVENT_ONGOING = range(DAY_START, current.day+1)
+dir_is_writeable = check_dir_is_writeable(parent_dir)
+if not dir_is_writeable:
+    exit_program(complete=False)
 
 
-# FILE AND FOLDER NAMES
-CURRENT_DIR = os.getcwd()
-PARENT_DIR = os.path.dirname(os.getcwd())
-PROJECT_FOLDER_NAME = "Advent-of-Code"
-PROJECT_FOLDER_PATH = os.path.join(PARENT_DIR, PROJECT_FOLDER_NAME)
-SOLUTION_1_FILE_NAME = "solution_1.py"
-SOLUTION_2_FILE_NAME = "solution_2.py"
-INPUT_DATA_FILE_NAME = "input.txt"
+session_cookie = get_session_cookie(SESSION_COOKIE_FILE)
+if not session_cookie:
+    continue_without_cookie = input(f"\nError: session cookie does not exist. Puzzle input data will not be downloaded. Continue? (Y/N): ")
+    if continue_without_cookie_file.upper() != "Y":
+        print(f"Update your {SESSION_COOKIE_FILE} with your logged in session cookie and re-run create_aoc.py.")
+        sys.exit(complete=False)
+cookie_is_valid = validate_session_cookie(session_cookie)
+
+
+
+
+
+def fetch_input_data(cookie, input_data_url, input_data_path):
+    pass
+
 
 
 # FILE & FOLDER CREATION
