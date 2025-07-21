@@ -60,62 +60,91 @@ ADVENT_OF_CODE_BASE_URL = "https://adventofcode.com"
 SESSION_COOKIE_FILE = "cookie.txt"
 
 
+def exit_program(complete=False):
+  if complete:
+    print("\nComplete.")
+  print("\nExiting...")
+  sys.exit()
+
+
 def validate_session_cookie(SESSION_COOKIE_FILE):
   """Validate the session cookie within the SESSION_COOKIE_FILE.
 
   args: SESSION_COOKIE_FILE (str, path)
-  returns: is_cookie_valid (Boolean value)
+  returns: cookie_is_valid (Boolean value)
   """
-  is_cookie_valid = False
+  cookie_is_valid = False
 
-  if os.path.exists(SESSION_COOKIE_FILE):
-    with open(SESSION_COOKIE_FILE, "r") as f:
-      SESSION_COOKIE = f.read().strip()
+  # cookie file does not exist
+  if not os.path.exists(SESSION_COOKIE_FILE):
+    continue_without_cookie_file = input(f"\nError: {SESSION_COOKIE_FILE} does not exist. Puzzle input data will not be downloaded. Continue? (Y/N): ")
+    if continue_without_cookie_file.upper() == "Y":
+      return cookie_is_valid
+    else:
+      print("\nExiting...")
+      sys.exit()
   
-    if SESSION_COOKIE:
-    # Test cookie for validity
-      session = requests.Session()
-      HEADERS = {
-        "Cookie":f"session={SESSION_COOKIE}",
-        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
-      }
-      test_url = f"{ADVENT_OF_CODE_BASE_URL}/2015/day/1/input"
-      response = session.get(test_url, headers=HEADERS)
-      if response.status_code == 200:
-        is_cookie_valid = True
+  # cookie file exists
+  with open(SESSION_COOKIE_FILE, "r") as f:
+    SESSION_COOKIE = f.read().strip()
+  
+  # cookie file is empty
+  if not SESSION_COOKIE:
+    continue_without_cookie_text = input(f"\n{SESSION_COOKIE_FILE} does not contain a cookie. Puzzle input data will not be downloaded. Continue? (Y/N): ")
+    if continue_without_cookie_text.upper() == "Y":
+      return cookie_is_valid
+    else:
+      exit_program()
+    
+  # cookie file is not empty
+  # Test cookie for validity
+  session = requests.Session()
+  HEADERS = {
+    "Cookie":f"session={SESSION_COOKIE}",
+    "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+  }
+  test_url = f"{ADVENT_OF_CODE_BASE_URL}/2015/day/1/input"
+  response = session.get(test_url, headers=HEADERS)
 
-  if not is_cookie_valid:
+  # cookie is valid
+  if response.status_code == 200:
+    cookie_is_valid = True
+    return cookie_is_valid
+
+  # cookie is not valid
+  if not cookie_is_valid:
     continue_prompt = input("Non-existent or invalid cookie. Puzzle input data will not be downloaded. Continue? (Y/N): ")
     if continue_prompt.upper() != "Y":
       exit_program()
     else:
-      return is_cookie_valid
+      return cookie_is_valid
+
+def fetch_input_data(cookie, )
 
 
 # DATE RANGES
 current = datetime.today()
-
-YEAR_START = 2015
-YEAR_END = current.year
+YEAR_START, YEAR_END = (2015, current.year)
 if current.month != 12:
   YEAR_END -= 1
 YEAR_RANGE = range(YEAR_START, YEAR_END+1)
-
-DAY_START = 1
-DAY_END = 25
+DAY_START, DAY_END = (1,25)
 DAY_RANGE = range(DAY_START, DAY_END+1)
 
+# EVENT STATUS
 EVENT_ONGOING = False
-if current.month == 12 and current.day <= DAY_END:
+MONTH_IS_DECEMBER = current.month == 12
+DATE_IS_WITHIN_ADVENT = current.day <= DAY_END
+if (MONTH_IS_DECEMBER and DATE_IS_WITHIN_ADVENT):
   EVENT_ONGOING = True
+  DAY_RANGE_ADVENT_ONGOING = range(DAY_START, current.day+1)
+
 
 # FILE AND FOLDER NAMES
 CURRENT_DIR = os.getcwd()
 PARENT_DIR = os.path.dirname(os.getcwd())
-
 PROJECT_FOLDER_NAME = "Advent-of-Code"
 PROJECT_FOLDER_PATH = os.path.join(PARENT_DIR, PROJECT_FOLDER_NAME)
-
 SOLUTION_1_FILE_NAME = "solution_1.py"
 SOLUTION_2_FILE_NAME = "solution_2.py"
 INPUT_DATA_FILE_NAME = "input.txt"
@@ -175,35 +204,44 @@ if __name__ == \"__main__\":
   return content
 
 
-create_directory(PROJECT_FOLDER_PATH)
+def create_aoc(PROJECT_FOLDER_PATH, YEAR_RANGE, DAY_RANGE):
 
-for year in YEAR_RANGE:
-  year_dir = os.path.join(PROJECT_FOLDER_PATH, f"{year}")
-  create_directory(year_dir)
-  if year == current.year and current.month == 12 and current.day < 25:
-    DAY_RANGE = range(1, current.day+1)
-  for day in DAY_RANGE:
-    day_dir = os.path.join(year_dir, f"day_{day:02d}")
-    create_directory(day_dir)
+  # Create Advent-of-Code directory
+  create_directory(PROJECT_FOLDER_PATH)
 
-    solution_1_path = os.path.join(day_dir, SOLUTION_1_FILE_NAME)
-    solution_1_content = generate_solution_file_content(1, year, day)
-    create_file(solution_1_path, solution_1_content)
+  # Create year folders
+  for year in YEAR_RANGE:
+    year_folder = f"{year}"
+    year_folder_path = os.path.join(PROJECT_FOLDER_PATH, year_folder)
+    create_directory(year_folder_path)
 
-    solution_2_path = os.path.join(day_dir, SOLUTION_2_FILE_NAME)
-    solution_2_content = generate_solution_file_content(2, year, day)
-    create_file(solution_2_path, solution_2_content)
+    # Create day folders
+    if (year == current.year and EVENT_ONGOING):
+      DAY_RANGE = DAY_RANGE_ADVENT_ONGOING
+    for day in DAY_RANGE:
+      day_folder = f"day_{day:02d}"
+      day_folder_path = os.path.join(year_folder_path, day_folder) 
+      create_directory(day_folder_path)
 
-    input_data_file_path = os.path.join(day_dir, INPUT_DATA_FILE_NAME)
-    puzzle_input = ""    
-    is_cookie_valid = validate_session_cookie(SESSION_COOKIE_FILE)
-    if is_cookie_valid:
-      puzzle_input_url = f"{ADVENT_OF_CODE_BASE_URL}/{year}/day/{day}/input"
-      session = requests.Session()
-      response = session.get(puzzle_input_url, headers=HEADERS)
-      if response.status_code == 200:
-        puzzle_input = response.text
-    with open(input_data_file_path, "w") as f:
-      f.write(puzzle_input.strip())
+      # Create solution files
+      solution_1_file_path = os.path.join(day_folder_path, SOLUTION_1_FILE_NAME)
+      solution_1_file_content = generate_solution_file_content(1, year, day)
+      create_file(solution_1_file_path, solution_1_file_content)
 
-print("\nComplete.")
+      solution_2_file_path = os.path.join(day_folder_path, SOLUTION_2_FILE_NAME)
+      solution_2_file_content = generate_solution_file_content(2, year, day)
+      create_file(solution_2_file_path, solution_2_file_content)
+
+      input_data_file_path = os.path.join(day_dir, INPUT_DATA_FILE_NAME)
+      puzzle_input = ""    
+      cookie_is_valid = validate_session_cookie()
+      if cookie_is_valid:
+        puzzle_input_url = f"{ADVENT_OF_CODE_BASE_URL}/{year}/day/{day}/input"
+        session = requests.Session()
+        response = session.get(puzzle_input_url, headers=HEADERS)
+        if response.status_code == 200:
+          puzzle_input = response.text
+      with open(input_data_file_path, "w") as f:
+        f.write(puzzle_input.strip())
+
+exit_program(complete=True)
